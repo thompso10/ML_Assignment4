@@ -1,6 +1,5 @@
 import numpy as np
-from decision_tree_classifier import DecisionTreeClassifier  # Reuse your Decision Tree Classifier
-
+from decision_tree_classifier import DecisionTreeClassifier 
 class RandomForestClassifier:
     def __init__(self, n_trees=10, data_frac=0.8, feature_subcount=None):
         """
@@ -14,7 +13,7 @@ class RandomForestClassifier:
         self.n_trees = n_trees
         self.data_frac = data_frac
         self.feature_subcount = feature_subcount
-        self.trees = []  # Stores (tree, features) pairs
+        self.trees = []  # Stores tree, features pairs
 
     def fit(self, X, y):
         """

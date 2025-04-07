@@ -7,10 +7,9 @@ import numpy as np
 import tqdm
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import classification_report
-from random_forest_classifier import RandomForestClassifier  # Your custom implementation
+from random_forest_classifier import RandomForestClassifier  
 from sklearn.naive_bayes import MultinomialNB
 
-# seed value (ensures consistent dataset splitting between runs)
 SEED = 0
 
 
@@ -34,6 +33,20 @@ def parse_args():
 
 
 def load_data(root, min_samples=20, max_samples=1000):
+    """
+    Loads and processes JSON feature files from the given root directory.
+
+    Filters labels by sample count, extracts numerical features, and builds
+    wordbag-style vectors for ports, domains, and ciphers.
+
+    Args:
+        root (str): Path to the root dataset directory.
+        min_samples (int): Minimum samples required per label.
+        max_samples (int): Maximum samples to load per label.
+
+    Returns:
+        tuple: (X, X_p, X_d, X_c, Y) as NumPy arrays.
+    """
     X, X_p, X_d, X_c, Y = [], [], [], [], []
     port_dict, domain_set, cipher_set = {}, set(), set()
 
@@ -126,18 +139,15 @@ def do_stage_1(X_tr, X_ts, Y_tr, Y_ts):
 
 
 def main(args):
-    """
-    Perform main logic of the program.
-    """
-    print("Loading dataset ...")
+    print("Loading dataset")
     X, X_p, X_d, X_c, Y = load_data(args.root)
 
-    print("Encoding labels ...")
+    print("Encoding labels")
     le = LabelEncoder()
     Y = le.fit_transform(Y)
 
     # Shuffle and split
-    print("Shuffling and splitting dataset ...")
+    print("Shuffling and splitting dataset")
     s = np.arange(len(Y))
     np.random.seed(SEED)
     np.random.shuffle(s)
@@ -147,7 +157,7 @@ def main(args):
     X_ts, Xp_ts, Xd_ts, Xc_ts, Y_ts = X[cut:], X_p[cut:], X_d[cut:], X_c[cut:], Y[cut:]
 
     # Stage 0
-    print("Performing Stage 0 ...")
+    print("Performing Stage 0")
     p_tr, p_ts, d_tr, d_ts, c_tr, c_ts = do_stage_0(Xp_tr, Xp_ts, Xd_tr, Xd_ts, Xc_tr, Xc_ts, Y_tr, Y_ts)
 
     # Combine for Stage 1
@@ -155,7 +165,7 @@ def main(args):
     X_ts_full = np.hstack((X_ts, p_ts, d_ts, c_ts))
 
     # Stage 1
-    print("Performing Stage 1 ...")
+    print("Performing Stage 1")
     pred = do_stage_1(X_tr_full, X_ts_full, Y_tr, Y_ts)
     print(classification_report(Y_ts, pred, target_names=le.classes_))
 
