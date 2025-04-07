@@ -90,7 +90,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 print(f"Training set size: {X_train.shape}, Test set size: {X_test.shape}")
 
 # Train Random Forest classifier
-rf = RandomForestClassifier(n_trees=10, data_frac=0.8, feature_subcount=1)  # Adjust parameters as needed
+rf = RandomForestClassifier(n_trees=9, data_frac=0.1, feature_subcount=1)  # Adjust parameters as needed
 rf.fit(X_train, y_train)
 
 # Predict and decode predictions back to original labels

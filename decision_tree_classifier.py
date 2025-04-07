@@ -137,7 +137,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 print(f"Training set size: {X_train.shape}, Test set size: {X_test.shape}")
 
 # Train Decision Tree classifier
-clf = DecisionTreeClassifier(max_depth=5)
+clf = DecisionTreeClassifier(max_depth=2)
 clf.fit(X_train, y_train)
 
 # Predict and evaluate
