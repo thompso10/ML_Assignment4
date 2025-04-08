@@ -5,7 +5,6 @@ import argparse
 import os
 import numpy as np
 import tqdm
-import time
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import classification_report
 from random_forest_classifier import RandomForestClassifier  
@@ -53,6 +52,14 @@ def load_data(root, min_samples=20, max_samples=1000):
 
     # Create paths and instance count filtering
     fpaths, fcounts = [], {}
+    for rt, dirs, files in os.walk(root):
+        for fname in files:
+            path = os.path.join(rt, fname)
+            label = os.path.basename(os.path.dirname(path))
+            if fname.startswith("features") and fname.endswith(".json"):
+                fpaths.append((path, label))
+                fcounts[label] = fcounts.get(label, 0) + 1
+
     
     try:
         for label in os.listdir(root):
@@ -119,43 +126,27 @@ def classify_bayes(X_tr, Y_tr, X_ts, Y_ts):
     return C_tr, C_ts
 
 
-
 def do_stage_0(Xp_tr, Xp_ts, Xd_tr, Xd_ts, Xc_tr, Xc_ts, Y_tr, Y_ts):
     """
     Perform stage 0 classification with naive bayes.
     """
-    timings = {}
-
-    # Classification for ports
-    start_time = time.time()
+    # Classification for ports, domains, and ciphers
     resp_tr, resp_ts = classify_bayes(Xp_tr, Y_tr, Xp_ts, Y_ts)
-    timings['ports'] = time.time() - start_time
-
-    # Classification for domains
-    start_time = time.time()
     resd_tr, resd_ts = classify_bayes(Xd_tr, Y_tr, Xd_ts, Y_ts)
-    timings['domains'] = time.time() - start_time
-
-    # Classification for ciphers
-    start_time = time.time()
     resc_tr, resc_ts = classify_bayes(Xc_tr, Y_tr, Xc_ts, Y_ts)
-    timings['ciphers'] = time.time() - start_time
-
-    return resp_tr, resp_ts, resd_tr, resd_ts, resc_tr, resc_ts, timings
+    return resp_tr, resp_ts, resd_tr, resd_ts, resc_tr, resc_ts
 
 
 def do_stage_1(X_tr, X_ts, Y_tr, Y_ts):
     """
     Perform stage 1 classification using custom Random Forest.
     """
-    start_time = time.time()
     model = RandomForestClassifier(n_trees=9, data_frac=0.8, feature_subcount=None)
     model.fit(X_tr, Y_tr)
     pred = model.predict(X_ts)
     score = classification_report(Y_ts, pred, output_dict=False)
     print(f"Stage 1 Classification Report:\n{score}")
-    stage_1_time = time.time() - start_time
-    return pred, stage_1_time
+    return pred
 
 
 def main(args):
@@ -178,9 +169,7 @@ def main(args):
 
     # Stage 0
     print("Performing Stage 0")
-    p_tr, p_ts, d_tr, d_ts, c_tr, c_ts, stage_0_timings = do_stage_0(
-        Xp_tr, Xp_ts, Xd_tr, Xd_ts, Xc_tr, Xc_ts, Y_tr, Y_ts
-    )
+    p_tr, p_ts, d_tr, d_ts, c_tr, c_ts = do_stage_0(Xp_tr, Xp_ts, Xd_tr, Xd_ts, Xc_tr, Xc_ts, Y_tr, Y_ts)
 
     # Combine for Stage 1
     X_tr_full = np.hstack((X_tr, p_tr, d_tr, c_tr))
@@ -188,15 +177,7 @@ def main(args):
 
     # Stage 1
     print("Performing Stage 1")
-    pred, stage_1_time = do_stage_1(X_tr_full, X_ts_full, Y_tr, Y_ts)
-
-    # Report timings
-    print("\nTiming Metrics:")
-    print(f"Stage 0 - Ports Classification Time: {stage_0_timings['ports']:.2f} seconds")
-    print(f"Stage 0 - Domains Classification Time: {stage_0_timings['domains']:.2f} seconds")
-    print(f"Stage 0 - Ciphers Classification Time: {stage_0_timings['ciphers']:.2f} seconds")
-    print(f"Stage 1 - Random Forest Training Time: {stage_1_time:.2f} seconds")
-
+    pred = do_stage_1(X_tr_full, X_ts_full, Y_tr, Y_ts)
     print(classification_report(Y_ts, pred, target_names=le.classes_))
 
 
