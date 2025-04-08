@@ -52,14 +52,17 @@ def load_data(root, min_samples=20, max_samples=1000):
 
     # Create paths and instance count filtering
     fpaths, fcounts = [], {}
-    for rt, dirs, files in os.walk(root):
-        for fname in files:
-            path = os.path.join(rt, fname)
-            label = os.path.basename(os.path.dirname(path))
-            if fname.startswith("features") and fname.endswith(".json"):
-                fpaths.append((path, label))
-                fcounts[label] = fcounts.get(label, 0) + 1
-
+    
+    try:
+        for label in os.listdir(root):
+            label_path = os.path.join(root, label)
+            if not os.path.isdir(label_path):
+                continue
+            fpaths.extend([(os.path.join(label_path, f), label) for f in os.listdir(label_path)])
+            fcounts[label] = len(os.listdir(label_path))
+    except TypeError:
+        print(("TypeError: expected str, bytes or os.PathLike object, not NoneType. \n(HINT: use the flag --root: <path to root dir>)"))
+        quit()
     processed_counts = {label: 0 for label in fcounts}
     for fpath in tqdm.tqdm(fpaths):
         path, label = fpath
