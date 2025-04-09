@@ -14,7 +14,7 @@ import seaborn as sns
 SEED = 0
 
 # Hardcoded paths - CHANGE THESE TO MATCH YOUR SYSTEM
-ROOT_PATH = r"A4_Materials\iot_data\iot_data"  # Raw string for Windows paths
+ROOT_PATH = r"A4_Materials/iot_data/iot_data"  # Raw string for Windows paths
 SPLIT_RATIO = 0.7  # Training/test split ratio
 
 
@@ -216,14 +216,14 @@ def main():
     # Decision Tree Classifier
     dt = DecisionTreeClassifier(max_depth=10)
     dt_pred = evaluate_model(dt, X_tr_full, X_ts_full, Y_tr, Y_ts, "Decision Tree", le)
-    plot_confusion_matrix(Y_ts, dt_pred, classes=le.classes_,
-                         title='Decision Tree - Normalized Confusion Matrix')
+    #plot_confusion_matrix(Y_ts, dt_pred, classes=le.classes_,
+                         #title='Decision Tree - Normalized Confusion Matrix')
 
     # Random Forest Classifier
     rf = RandomForestClassifier(n_trees=20, data_frac=1.0, feature_subcount=None)
     rf_pred = evaluate_model(rf, X_tr_full, X_ts_full, Y_tr, Y_ts, "Random Forest", le)
-    plot_confusion_matrix(Y_ts, rf_pred, classes=le.classes_,
-                         title='Random Forest - Normalized Confusion Matrix')
+    #plot_confusion_matrix(Y_ts, rf_pred, classes=le.classes_,
+                         #title='Random Forest - Normalized Confusion Matrix')
 
 if __name__ == "__main__":
     main()
