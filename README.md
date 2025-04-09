@@ -24,7 +24,7 @@ How to Run
    
 2. Run the pipeline by executing the following command:
 
-python3 classify.py" --root "ML_Assignment4\A4_Materials\iot_data\iot_data" 
+python3 classify.py 
 
 run the python file classify, and in root pass it the IOT data folder as its parameter, in this example we give the relative filepath from the folder containing classify.
 
