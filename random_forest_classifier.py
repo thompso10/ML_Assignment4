@@ -1,7 +1,7 @@
 import numpy as np
 from decision_tree_classifier import DecisionTreeClassifier 
 class RandomForestClassifier:
-    def __init__(self, n_trees=10, data_frac=0.8, feature_subcount=None):
+    def __init__(self, n_trees=20, data_frac=1.0, feature_subcount=None):
         """
         Initialize the Random Forest Classifier.
 
