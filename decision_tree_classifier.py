@@ -1,7 +1,7 @@
 import numpy as np
 
 class DecisionTreeClassifier:
-    def __init__(self, max_depth=None):
+    def __init__(self, max_depth=10):
         """
         Initialize the Decision Tree Classifier.
 
