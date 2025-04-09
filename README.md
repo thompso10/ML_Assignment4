@@ -7,9 +7,7 @@ Setup and Installation
 Prerequisites
 Make sure you have Python 3.6 or newer installed. You will also need to install the following Python libraries:
 
-- numpy
-- scikit-learn
-- tqdm
+everything in requirements.txt
 **To install all the dependencies, you can just pip install -r requirements.txt**
 
 2.
