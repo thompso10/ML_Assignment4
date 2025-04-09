@@ -1,4 +1,3 @@
-# classify.py
 import json
 import os
 import numpy as np
@@ -10,6 +9,7 @@ from decision_tree_classifier import DecisionTreeClassifier
 from random_forest_classifier import RandomForestClassifier
 import matplotlib.pyplot as plt
 import seaborn as sns
+import time  # Added for timing measurements
 
 SEED = 0
 
@@ -21,7 +21,6 @@ SPLIT_RATIO = 0.7  # Training/test split ratio
 def plot_confusion_matrix(y_true, y_pred, classes, normalize=True, title='Confusion Matrix'):
     """
     Plot a normalized confusion matrix with wider squares.
-
     Args:
         y_true: True labels
         y_pred: Predicted labels
@@ -166,26 +165,43 @@ def do_stage_0(Xp_tr, Xp_ts, Xd_tr, Xd_ts, Xc_tr, Xc_ts, Y_tr, Y_ts):
 
 def evaluate_model(model, X_tr, X_ts, Y_tr, Y_ts, model_name, le):
     """
-    Evaluate a given model and print results.
+    Evaluate a given model and print results with timing information.
     """
     print(f"\nTraining {model_name}...")
+
+    # Measure training time
+    start_time = time.time()
     model.fit(X_tr, Y_tr)
+    training_time = time.time() - start_time
+
+    # Measure prediction time
+    start_time = time.time()
+    train_pred = model.predict(X_tr)
+    train_time = time.time() - start_time
+
+    start_time = time.time()
+    test_pred = model.predict(X_ts)
+    test_time = time.time() - start_time
 
     # Training accuracy
-    train_pred = model.predict(X_tr)
     train_acc = np.mean(train_pred == Y_tr)
-    print(f"{model_name} Training Accuracy: {train_acc:.4f}")
 
     # Test accuracy
-    test_pred = model.predict(X_ts)
     test_acc = np.mean(test_pred == Y_ts)
+
+    # Print results with timing information
+    print(f"{model_name} Training Time: {training_time:.4f} seconds")
+    print(f"{model_name} Training Prediction Time: {train_time:.4f} seconds")
+    print(f"{model_name} Test Prediction Time: {test_time:.4f} seconds")
+    print(f"{model_name} Training Accuracy: {train_acc:.4f}")
     print(f"{model_name} Test Accuracy: {test_acc:.4f}")
 
     # Classification report with zero_division parameter
     print(f"\n{model_name} Classification Report:")
     print(classification_report(Y_ts, test_pred, target_names=le.classes_, zero_division=0))
 
-    return test_pred
+    return test_pred, training_time
+
 
 def main():
     print("Loading dataset")
@@ -215,15 +231,17 @@ def main():
 
     # Decision Tree Classifier
     dt = DecisionTreeClassifier(max_depth=10)
-    dt_pred = evaluate_model(dt, X_tr_full, X_ts_full, Y_tr, Y_ts, "Decision Tree", le)
-    #plot_confusion_matrix(Y_ts, dt_pred, classes=le.classes_,
-                         #title='Decision Tree - Normalized Confusion Matrix')
+    dt_pred, dt_time = evaluate_model(dt, X_tr_full, X_ts_full, Y_tr, Y_ts, "Decision Tree", le)
+    plot_confusion_matrix(Y_ts, dt_pred, classes=le.classes_,
+                          title='Decision Tree - Normalized Confusion Matrix')
 
     # Random Forest Classifier
     rf = RandomForestClassifier(n_trees=20, data_frac=1.0, feature_subcount=None)
-    rf_pred = evaluate_model(rf, X_tr_full, X_ts_full, Y_tr, Y_ts, "Random Forest", le)
-    #plot_confusion_matrix(Y_ts, rf_pred, classes=le.classes_,
-                         #title='Random Forest - Normalized Confusion Matrix')
+    rf_pred, rf_time = evaluate_model(rf, X_tr_full, X_ts_full, Y_tr, Y_ts, "Random Forest", le)
+    plot_confusion_matrix(Y_ts, rf_pred, classes=le.classes_,
+                          title='Random Forest - Normalized Confusion Matrix')
+
+
 
 if __name__ == "__main__":
     main()
