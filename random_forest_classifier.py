@@ -37,7 +37,7 @@ class RandomForestClassifier:
             X_subset = X_subset[:, features]
 
             # Train a Decision Tree
-            tree = DecisionTreeClassifier(max_depth=None)  # Use your Decision Tree implementation
+            tree = DecisionTreeClassifier(max_depth=None)
             tree.fit(X_subset, y_subset)
             self.trees.append((tree, features))  # Save the tree and the selected features
 
